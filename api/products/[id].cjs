@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
-const Product = require('../models/product');
-const dbURI = 'mongodb+srv://arulzkash:kashidota@cluster0.up4ol.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0';
+const Product = require('../models/product.cjs'); // Pastikan path model benar
 
+const dbURI = process.env.MONGODB_URI;
 let isConnected;
 
 async function connectDB() {
