@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const Product = require('./models/product'); // Pastikan untuk membuat file `models/product.js` terpisah
-const dbURI = 'mongodb+srv://arulzkash:kashidota@cluster0.up4ol.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0';
+import mongoose from 'mongoose';
+import Product from './models/product.js';
 
+const dbURI = process.env.MONGODB_URI;
 let isConnected;
 
 async function connectDB() {
@@ -14,11 +14,10 @@ async function connectDB() {
   console.log('Connected to MongoDB Atlas');
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   await connectDB();
   
   if (req.method === 'GET') {
-    // Mendapatkan semua produk
     try {
       const products = await Product.find();
       res.status(200).json(products);
@@ -27,7 +26,6 @@ module.exports = async (req, res) => {
       res.status(500).json({ message: 'Error fetching products' });
     }
   } else if (req.method === 'POST') {
-    // Menambahkan produk baru
     try {
       const newProduct = new Product(req.body);
       await newProduct.save();
