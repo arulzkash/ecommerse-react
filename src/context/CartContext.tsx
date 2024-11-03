@@ -7,10 +7,11 @@ interface CartState {
   total: number;
 }
 
+// Perbarui CartAction agar `id` menggunakan tipe `string`
 type CartAction =
   | { type: 'ADD_TO_CART'; payload: Product }
-  | { type: 'REMOVE_FROM_CART'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: number; quantity: number } }
+  | { type: 'REMOVE_FROM_CART'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' };
 
 const CartContext = createContext<{
@@ -42,6 +43,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
     }
     case 'REMOVE_FROM_CART': {
+      // Menggunakan tipe `string` untuk perbandingan ID
       const newItems = state.items.filter(item => item.id !== action.payload);
       toast.success('Removed from cart');
       return {
