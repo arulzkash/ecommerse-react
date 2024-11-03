@@ -1,0 +1,10 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "package.json", "use": "@vercel/static-build" }
+    ],
+    "env": {
+      "MONGODB_URI": "mongodb+srv://arulzkash:kashidota@cluster0.up4ol.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0"
+    }
+  }
+  
