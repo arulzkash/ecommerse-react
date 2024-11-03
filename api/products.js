@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const Product = require('./models/product.cjs'); // Pastikan path model benar
+import mongoose from 'mongoose';
+import Product from './models/product.js';
 
-const dbURI = process.env.MONGODB_URI; // Jangan lupa set MONGODB_URI di Environment Variables
+const dbURI = process.env.MONGODB_URI;
 let isConnected;
 
 async function connectDB() {
@@ -14,7 +14,7 @@ async function connectDB() {
   console.log('Connected to MongoDB Atlas');
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   await connectDB();
   
   if (req.method === 'GET') {
