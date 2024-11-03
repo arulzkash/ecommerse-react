@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Product from '../models/product.js';
+import Product from '../models/product.mjs'; // Gunakan ekstensi .mjs
 
 const dbURI = process.env.MONGODB_URI;
 let isConnected;
