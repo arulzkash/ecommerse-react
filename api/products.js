@@ -1,7 +1,8 @@
 // pages/api/products.js
 import mongoose from 'mongoose';
+import Cors from 'cors';
 
-// Koneksi ke MongoDB Atlas
+// Inisialisasi koneksi ke MongoDB Atlas
 const dbURI = 'mongodb+srv://arulzkash:kashidota@cluster0.up4ol.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0';
 
 let cachedDb = null;
@@ -34,8 +35,26 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
-// Endpoint untuk mendapatkan semua produk
+// Inisialisasi middleware CORS
+const cors = Cors({
+  methods: ['GET', 'HEAD'],
+});
+
+// Middleware handler untuk menangani request CORS
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
+
+// Endpoint handler untuk mendapatkan semua produk
 export default async function handler(req, res) {
+  await runMiddleware(req, res, cors);
   await connectToDatabase();
 
   if (req.method === 'GET') {
