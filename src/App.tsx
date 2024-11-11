@@ -27,13 +27,14 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(1000);
   const [products, setProducts] = useState<Product[]>([]);
 
-  // Fetch products from API
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((response) => response.json())
-      .then((data: ApiProduct[]) => { 
+      .then((data: ApiProduct[]) => {
         const mappedProducts: Product[] = data.map((product) => ({
           id: product._id,
           name: product.name,
@@ -56,6 +57,9 @@ function App() {
     )
     .filter((product) =>
       selectedCategory ? product.category === selectedCategory : true
+    )
+    .filter((product) => 
+      product.price >= minPrice && product.price <= maxPrice
     );
 
   return (
@@ -88,6 +92,30 @@ function App() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
             />
+          </div>
+
+          {/* Filter Harga */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Filter Harga:</label>
+            <div className="flex items-center gap-4">
+              <input
+                type="number"
+                min="0"
+                value={minPrice}
+                onChange={(e) => setMinPrice(Number(e.target.value))}
+                className="w-20 px-2 py-1 border rounded-lg"
+                placeholder="Min"
+              />
+              <span>-</span>
+              <input
+                type="number"
+                min="0"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="w-20 px-2 py-1 border rounded-lg"
+                placeholder="Max"
+              />
+            </div>
           </div>
 
           {/* Filter Kategori */}
