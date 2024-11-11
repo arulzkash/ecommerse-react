@@ -29,12 +29,14 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(1000);
+  const [sortType, setSortType] = useState("priceAsc");
   const [products, setProducts] = useState<Product[]>([]);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/products")
       .then((response) => response.json())
-      .then((data: ApiProduct[]) => {
+      .then((data: ApiProduct[]) => { 
         const mappedProducts: Product[] = data.map((product) => ({
           id: product._id,
           name: product.name,
@@ -47,6 +49,16 @@ function App() {
       })
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
+
+  const addToWishlist = (product: Product) => {
+    if (!wishlist.find(item => item.id === product.id)) {
+      setWishlist([...wishlist, product]);
+    }
+  };
+
+  const removeFromWishlist = (productId: string) => {
+    setWishlist(wishlist.filter(item => item.id !== productId));
+  };
 
   const categories = Array.from(new Set(products.map((product) => product.category)));
 
@@ -61,6 +73,22 @@ function App() {
     .filter((product) => 
       product.price >= minPrice && product.price <= maxPrice
     );
+
+  const sortedAndFilteredProducts = filteredProducts.sort((a, b) => {
+    if (sortType === "priceAsc") {
+      return a.price - b.price;
+    }
+    if (sortType === "priceDesc") {
+      return b.price - a.price;
+    }
+    if (sortType === "nameAsc") {
+      return a.name.localeCompare(b.name);
+    }
+    if (sortType === "nameDesc") {
+      return b.name.localeCompare(a.name);
+    }
+    return 0;
+  });
 
   return (
     <CartProvider>
@@ -118,6 +146,21 @@ function App() {
             </div>
           </div>
 
+          {/* Sorting Produk */}
+          <div className="mb-4">
+            <label className="block text-gray-700">Urutkan Berdasarkan:</label>
+            <select
+              value={sortType}
+              onChange={(e) => setSortType(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+            >
+              <option value="priceAsc">Harga Terendah ke Tertinggi</option>
+              <option value="priceDesc">Harga Tertinggi ke Terendah</option>
+              <option value="nameAsc">Nama Produk (A-Z)</option>
+              <option value="nameDesc">Nama Produk (Z-A)</option>
+            </select>
+          </div>
+
           {/* Filter Kategori */}
           <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
             <button
@@ -144,11 +187,36 @@ function App() {
           </div>
 
           {/* Tampilkan Produk */}
+          <h2 className="text-2xl font-bold mb-4">Produk</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {sortedAndFilteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isWishlisted={wishlist.some(item => item.id === product.id)}
+                addToWishlist={addToWishlist}
+                removeFromWishlist={removeFromWishlist}
+              />
             ))}
           </div>
+
+          {/* Tampilkan Wishlist */}
+          <h2 className="text-2xl font-bold mt-8 mb-4">Wishlist</h2>
+          {wishlist.length === 0 ? (
+            <p className="text-gray-500">Wishlist Anda kosong.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {wishlist.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isWishlisted={true}
+                  addToWishlist={addToWishlist}
+                  removeFromWishlist={removeFromWishlist}
+                />
+              ))}
+            </div>
+          )}
         </main>
 
         <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

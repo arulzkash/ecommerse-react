@@ -1,13 +1,21 @@
 import React from 'react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
+  isWishlisted: boolean;
+  addToWishlist: (product: Product) => void;
+  removeFromWishlist: (productId: string) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  isWishlisted,
+  addToWishlist,
+  removeFromWishlist,
+}) => {
   const { dispatch } = useCart();
 
   return (
@@ -18,7 +26,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         className="w-full h-48 object-cover"
       />
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+        <div className="flex justify-between items-start">
+          <h3 className="text-lg font-semibold text-gray-800">{product.name}</h3>
+          <button
+            onClick={() =>
+              isWishlisted ? removeFromWishlist(product.id) : addToWishlist(product)
+            }
+            className={`p-2 rounded-full ${
+              isWishlisted ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
+            }`}
+          >
+            <Heart className="h-5 w-5" />
+          </button>
+        </div>
         <p className="text-gray-600 text-sm mt-1">{product.description}</p>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xl font-bold text-gray-900">
