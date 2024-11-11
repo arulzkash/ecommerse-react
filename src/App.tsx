@@ -33,11 +33,118 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<Product[]>([]);
 
+  // Fetch products on component mount
   useEffect(() => {
-    fetch("http://localhost:5000/api/products")
-      .then((response) => response.json())
-      .then((data: ApiProduct[]) => { 
-        const mappedProducts: Product[] = data.map((product) => ({
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/products");
+        if (response.ok) {
+          const data: ApiProduct[] = await response.json();
+          const mappedProducts: Product[] = data.map((product) => ({
+            id: product._id,
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            image: product.image,
+            category: product.category,
+          }));
+          setProducts(mappedProducts);
+        } else {
+          console.error("Failed to fetch products:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Fetch wishlist on component mount
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/wishlist");
+        if (response.ok) {
+          const data: ApiProduct[] = await response.json();
+          const mappedWishlist: Product[] = data.map((product) => ({
+            id: product._id,
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            image: product.image,
+            category: product.category,
+          }));
+          setWishlist(mappedWishlist);
+        } else {
+          console.error("Failed to fetch wishlist:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
+
+  const addToWishlist = async (product: Product) => {
+    // Cek apakah produk sudah ada di wishlist
+    if (wishlist.some(item => item.id === product.id)) {
+      console.log("Product is already in wishlist");
+      return;
+    }
+  
+    try {
+      const response = await fetch("http://localhost:5000/api/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: product.id }),
+      });
+  
+      if (response.ok) {
+        // Ambil wishlist terbaru setelah menambahkan produk
+        const updatedWishlistResponse = await fetch("http://localhost:5000/api/wishlist");
+        
+        if (updatedWishlistResponse.ok) {
+          const updatedWishlistData: ApiProduct[] = await updatedWishlistResponse.json();
+          
+          // Pemetaan data wishlist dari API ke state `wishlist`
+          const mappedWishlist: Product[] = updatedWishlistData.map((product) => ({
+            id: product._id,
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            image: product.image,
+            category: product.category,
+          }));
+  
+          // Update state wishlist dengan data terbaru
+          setWishlist(mappedWishlist);
+          console.log("Wishlist updated successfully:", mappedWishlist);
+        } else {
+          console.error("Failed to fetch updated wishlist:", updatedWishlistResponse.statusText);
+        }
+      } else {
+        console.error("Failed to add to wishlist:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+    }
+  };
+  
+  // Fungsi untuk menghapus produk dari wishlist
+  const removeFromWishlist = async (productId: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // Fetch ulang wishlist dari backend setelah menghapus produk
+        const updatedWishlist: ApiProduct[] = await fetch("http://localhost:5000/api/wishlist").then(res => res.json());
+        const mappedWishlist: Product[] = updatedWishlist.map((product) => ({
           id: product._id,
           name: product.name,
           price: product.price,
@@ -45,34 +152,9 @@ function App() {
           image: product.image,
           category: product.category,
         }));
-        setProducts(mappedProducts);
-      })
-      fetch("http://localhost:5000/api/wishlist")
-      .then(response => response.json())
-      .then(data => setWishlist(data))
-      .catch(error => console.error("Error fetching wishlist:", error));
-  }, []);
-
-  const addToWishlist = async (product: Product) => {
-    try {
-      const response = await fetch("http://localhost:5000/api/wishlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productId: product.id }),
-      });
-      if (response.ok) setWishlist([...wishlist, product]);
-    } catch (error) {
-      console.error("Error adding to wishlist:", error);
-    }
-  };
-
-  const removeFromWishlist = async (productId: string) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setWishlist(wishlist.filter(item => item.id !== productId));
+        setWishlist(mappedWishlist);
+      } else {
+        console.error("Failed to remove from wishlist:", response.statusText);
       }
     } catch (error) {
       console.error("Error removing from wishlist:", error);
