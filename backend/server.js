@@ -24,6 +24,13 @@ const productSchema = new mongoose.Schema({
   category: String,
 });
 
+const wishlistSchema = new mongoose.Schema({
+  productIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
+});
+
+const Wishlist = mongoose.model('Wishlist', wishlistSchema);
+
+
 const Product = mongoose.model('Product', productSchema);
 
 // Endpoint untuk mendapatkan semua produk
@@ -72,6 +79,57 @@ app.delete('/api/products/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ message: 'Error deleting product' });
+  }
+});
+
+// Endpoint untuk mendapatkan wishlist umum
+app.get('/api/wishlist', async (req, res) => {
+  try {
+    const wishlist = await Wishlist.findOne().populate('productIds');
+    res.json(wishlist ? wishlist.productIds : []);
+  } catch (error) {
+    console.error('Error fetching wishlist:', error);
+    res.status(500).json({ message: 'Error fetching wishlist' });
+  }
+});
+
+// Endpoint untuk menambah produk ke wishlist
+app.post('/api/wishlist', async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+    let wishlist = await Wishlist.findOne();
+    if (!wishlist) {
+      wishlist = new Wishlist({ productIds: [productId] });
+    } else {
+      if (!wishlist.productIds.includes(productId)) {
+        wishlist.productIds.push(productId);
+      }
+    }
+
+    await wishlist.save();
+    res.status(200).json(wishlist.productIds);
+  } catch (error) {
+    console.error('Error adding to wishlist:', error);
+    res.status(500).json({ message: 'Error adding to wishlist' });
+  }
+});
+
+// Endpoint untuk menghapus produk dari wishlist
+app.delete('/api/wishlist/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+
+    const wishlist = await Wishlist.findOne();
+    if (wishlist) {
+      wishlist.productIds = wishlist.productIds.filter(id => id.toString() !== productId);
+      await wishlist.save();
+    }
+
+    res.status(204).end();
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+    res.status(500).json({ message: 'Error removing from wishlist' });
   }
 });
 

@@ -47,17 +47,36 @@ function App() {
         }));
         setProducts(mappedProducts);
       })
-      .catch((error) => console.error("Error fetching products:", error));
+      fetch("http://localhost:5000/api/wishlist")
+      .then(response => response.json())
+      .then(data => setWishlist(data))
+      .catch(error => console.error("Error fetching wishlist:", error));
   }, []);
 
-  const addToWishlist = (product: Product) => {
-    if (!wishlist.find(item => item.id === product.id)) {
-      setWishlist([...wishlist, product]);
+  const addToWishlist = async (product: Product) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id }),
+      });
+      if (response.ok) setWishlist([...wishlist, product]);
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
     }
   };
 
-  const removeFromWishlist = (productId: string) => {
-    setWishlist(wishlist.filter(item => item.id !== productId));
+  const removeFromWishlist = async (productId: string) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/wishlist/${productId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setWishlist(wishlist.filter(item => item.id !== productId));
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+    }
   };
 
   const categories = Array.from(new Set(products.map((product) => product.category)));
