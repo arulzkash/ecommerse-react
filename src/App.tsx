@@ -6,7 +6,7 @@ import { ShoppingCart, Store } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
 interface Product {
-  id: string; // Pastikan id bertipe string
+  id: string;
   name: string;
   price: number;
   description: string;
@@ -15,7 +15,7 @@ interface Product {
 }
 
 interface ApiProduct {
-  _id: string; // tipe ID dari MongoDB adalah string
+  _id: string;
   name: string;
   price: number;
   description: string;
@@ -26,6 +26,7 @@ interface ApiProduct {
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<Product[]>([]);
 
   // Fetch products from API
@@ -34,7 +35,7 @@ function App() {
       .then((response) => response.json())
       .then((data: ApiProduct[]) => { 
         const mappedProducts: Product[] = data.map((product) => ({
-          id: product._id, // gunakan id dalam string sesuai dari MongoDB
+          id: product._id,
           name: product.name,
           price: product.price,
           description: product.description,
@@ -46,13 +47,16 @@ function App() {
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
 
-  const categories = Array.from(
-    new Set(products.map((product) => product.category))
-  );
+  const categories = Array.from(new Set(products.map((product) => product.category)));
 
-  const filteredProducts = selectedCategory
-    ? products.filter((product) => product.category === selectedCategory)
-    : products;
+  const filteredProducts = products
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((product) =>
+      selectedCategory ? product.category === selectedCategory : true
+    );
 
   return (
     <CartProvider>
@@ -75,6 +79,17 @@ function App() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Input Pencarian */}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Cari produk..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
+
           {/* Filter Kategori */}
           <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
             <button
