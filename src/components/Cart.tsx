@@ -53,13 +53,24 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() =>
-                          dispatch({
-                            type: 'UPDATE_QUANTITY',
-                            payload: {
-                              id: item.id,
-                              quantity: Math.max(0, item.quantity - 1),
-                            },
-                          })
+                        {
+                          if (item.quantity === 1) {
+                            // Jika quantity sudah 1, hapus produk dari keranjang
+                            dispatch({
+                              type: 'REMOVE_FROM_CART',
+                              payload: item.id,
+                            });
+                          } else {
+                            // Jika quantity lebih dari 1, kurangi quantity
+                            dispatch({
+                              type: 'UPDATE_QUANTITY',
+                              payload: {
+                                id: item.id,
+                                quantity: item.quantity - 1,
+                              },
+                            });
+                          }
+                        }
                         }
                         className="p-1 rounded-full hover:bg-gray-200"
                       >
