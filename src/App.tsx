@@ -4,6 +4,7 @@ import { ProductCard } from "./components/ProductCard";
 import { Cart } from "./components/Cart";
 import { ShoppingCart, Store } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import { WishlistToCart } from "./components/WishlistToCart";
 
 interface Product {
   id: string;
@@ -306,18 +307,22 @@ function App() {
           {wishlist.length === 0 ? (
             <p className="text-gray-500">Wishlist Anda kosong.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {wishlist.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  isWishlisted={true}
-                  addToWishlist={addToWishlist}
-                  removeFromWishlist={removeFromWishlist}
-                />
-              ))}
-            </div>
+            <>
+              <WishlistToCart wishlist={wishlist} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {wishlist.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isWishlisted={true}
+                    addToWishlist={addToWishlist}
+                    removeFromWishlist={removeFromWishlist}
+                  />
+                ))}
+              </div>
+            </>
           )}
+          
         </main>
 
         <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />

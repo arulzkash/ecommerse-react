@@ -12,7 +12,8 @@ type CartAction =
   | { type: 'ADD_TO_CART'; payload: Product }
   | { type: 'REMOVE_FROM_CART'; payload: string }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
-  | { type: 'CLEAR_CART' };
+  | { type: 'CLEAR_CART' }
+  | { type: 'ADD_MULTIPLE_TO_CART'; payload: Product[] };
 
 const CartContext = createContext<{
   state: CartState;
@@ -62,6 +63,26 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
       };
     }
+
+    case 'ADD_MULTIPLE_TO_CART': {
+      const newItems = action.payload.reduce((acc, product) => {
+        const existingItem = acc.find(item => item.id === product.id);
+        if (existingItem) {
+          return acc.map(item =>
+            item.id === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          );
+        }
+        return [...acc, { ...product, quantity: 1 }];
+      }, state.items);
+      toast.success('Added to cart');
+      return {
+        items: newItems,
+        total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      };
+    }    
+    
     case 'CLEAR_CART':
       toast.success('Cart cleared');
       return { items: [], total: 0 };
