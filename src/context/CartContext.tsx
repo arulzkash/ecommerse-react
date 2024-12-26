@@ -30,14 +30,12 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
-        toast.success('Added to cart');
         return {
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
         };
       }
       const newItems = [...state.items, { ...action.payload, quantity: 1 }];
-      toast.success('Added to cart');
       return {
         items: newItems,
         total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -46,7 +44,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'REMOVE_FROM_CART': {
       // Menggunakan tipe `string` untuk perbandingan ID
       const newItems = state.items.filter(item => item.id !== action.payload);
-      toast.success('Removed from cart');
       return {
         items: newItems,
         total: newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
@@ -84,7 +81,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }    
     
     case 'CLEAR_CART':
-      toast.success('Cart cleared');
       return { items: [], total: 0 };
     default:
       return state;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
@@ -10,8 +11,19 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
   if (!isOpen) return null;
 
+  const handleRemoveFromCart = (id: string, name: string) => {
+    dispatch({ type: 'REMOVE_FROM_CART', payload: id });
+    toast.success(`${name} removed from cart!`);
+  };
+
+  const handleClearCart = () => {
+    dispatch({ type: 'CLEAR_CART' });
+    toast.success('All items have been removed from the cart!');
+  };
+
   const handleCheckout = () => {
     dispatch({ type: 'CLEAR_CART' });
+    toast.success('Checkout successful!');
     onClose();
   };
 
@@ -52,16 +64,10 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <button
-                        onClick={() =>
-                        {
+                        onClick={() => {
                           if (item.quantity === 1) {
-                            // Jika quantity sudah 1, hapus produk dari keranjang
-                            dispatch({
-                              type: 'REMOVE_FROM_CART',
-                              payload: item.id,
-                            });
+                            handleRemoveFromCart(item.id, item.name);
                           } else {
-                            // Jika quantity lebih dari 1, kurangi quantity
                             dispatch({
                               type: 'UPDATE_QUANTITY',
                               payload: {
@@ -70,8 +76,7 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                               },
                             });
                           }
-                        }
-                        }
+                        }}
                         className="p-1 rounded-full hover:bg-gray-200"
                       >
                         <Minus size={16} />
@@ -92,12 +97,7 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                         <Plus size={16} />
                       </button>
                       <button
-                        onClick={() =>
-                          dispatch({
-                            type: 'REMOVE_FROM_CART',
-                            payload: item.id,
-                          })
-                        }
+                        onClick={() => handleRemoveFromCart(item.id, item.name)}
                         className="ml-auto p-1 text-red-500 hover:bg-red-50 rounded-full"
                       >
                         <Trash2 size={16} />
@@ -113,6 +113,12 @@ export const Cart: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
                 <span>Total:</span>
                 <span>${state.total.toFixed(2)}</span>
               </div>
+              <button
+                onClick={handleClearCart}
+                className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition-colors mb-2"
+              >
+                Clear Cart
+              </button>
               <button
                 onClick={handleCheckout}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"

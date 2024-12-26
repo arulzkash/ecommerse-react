@@ -5,25 +5,47 @@ import { Product } from '../types';
 
 interface WishlistToCartProps {
   wishlist: Product[];
+  setWishlist: (newWishlist: Product[]) => void;
 }
 
-export const WishlistToCart: React.FC<WishlistToCartProps> = ({ wishlist }) => {
-  const { dispatch } = useCart();
+export const WishlistToCart: React.FC<WishlistToCartProps> = ({
+  wishlist,
+  setWishlist,
+}) => {
+  const { dispatch: cartDispatch } = useCart();
 
-  const handleAddAllToCart = () => {
+  const handleAddAllToCart = async () => {
     if (wishlist.length > 0) {
-      // Dispatch action to add all items to cart
-      dispatch({ type: 'ADD_MULTIPLE_TO_CART', payload: wishlist });
-      toast.success('All wishlist items added to cart');
+      try {
+        wishlist.forEach((item) => {
+          cartDispatch({ type: 'ADD_TO_CART', payload: item });
+        });
+  
+        const response = await fetch('http://localhost:5000/api/wishlist', {
+          method: 'DELETE',
+        });
+  
+        if (response.ok) {
+          setWishlist([]);
+          toast.success('All wishlist items have been added to the cart and wishlist cleared!');
+        } else {
+          const errorData = await response.json();
+          console.error('Server error:', errorData.message);
+          toast.error('Failed to clear wishlist on the server.');
+        }
+      } catch (error) {
+        console.error('Error clearing wishlist:', error);
+        toast.error('An error occurred while clearing the wishlist.');
+      }
     } else {
-      toast.error('Your wishlist is empty');
+      toast.error('Your wishlist is empty!');
     }
-  };
+  };  
+
   return (
-      <button
+    <button
       onClick={handleAddAllToCart}
-        className="bg-green-500 text-white px-4 py-2 rounded mb-4"
-    //   className="bg-green-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+      className="bg-green-500 text-white px-4 py-2 rounded mb-4"
     >
       Add All Wishlist to Cart
     </button>
