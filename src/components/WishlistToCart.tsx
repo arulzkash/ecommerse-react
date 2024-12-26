@@ -10,7 +10,7 @@ interface WishlistToCartProps {
 
 export const WishlistToCart: React.FC<WishlistToCartProps> = ({
   wishlist,
-  setWishlist,
+  // setWishlist,
 }) => {
   const { dispatch: cartDispatch } = useCart();
 
@@ -22,12 +22,12 @@ export const WishlistToCart: React.FC<WishlistToCartProps> = ({
         });
   
         const response = await fetch('http://localhost:5000/api/wishlist', {
-          method: 'DELETE',
+          
         });
   
         if (response.ok) {
-          setWishlist([]);
-          toast.success('All wishlist items have been added to the cart and wishlist cleared!');
+          // setWishlist([]);
+          toast.success('All wishlist items have been added to the cart!');
         } else {
           const errorData = await response.json();
           console.error('Server error:', errorData.message);
