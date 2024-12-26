@@ -5,42 +5,25 @@ import { Product } from '../types';
 
 interface WishlistToCartProps {
   wishlist: Product[];
-  setWishlist: (newWishlist: Product[]) => void;
 }
 
-export const WishlistToCart: React.FC<WishlistToCartProps> = ({
-  wishlist,
-  // setWishlist,
-}) => {
+export const WishlistToCart: React.FC<WishlistToCartProps> = ({ wishlist }) => {
   const { dispatch: cartDispatch } = useCart();
 
-  const handleAddAllToCart = async () => {
+  const handleAddAllToCart = () => {
     if (wishlist.length > 0) {
-      try {
-        wishlist.forEach((item) => {
-          cartDispatch({ type: 'ADD_TO_CART', payload: item });
-        });
-  
-        const response = await fetch('http://localhost:5000/api/wishlist', {
-          
-        });
-  
-        if (response.ok) {
-          // setWishlist([]);
-          toast.success('All wishlist items have been added to the cart!');
-        } else {
-          const errorData = await response.json();
-          console.error('Server error:', errorData.message);
-          toast.error('Failed to clear wishlist on the server.');
-        }
-      } catch (error) {
-        console.error('Error clearing wishlist:', error);
-        toast.error('An error occurred while clearing the wishlist.');
-      }
+      // Tambahkan semua item dari wishlist ke cart
+      wishlist.forEach((item) => {
+        cartDispatch({ type: 'ADD_TO_CART', payload: item });
+      });
+
+      // Notifikasi sukses
+      toast.success('All wishlist items have been added to the cart!');
     } else {
+      // Notifikasi jika wishlist kosong
       toast.error('Your wishlist is empty!');
     }
-  };  
+  };
 
   return (
     <button
