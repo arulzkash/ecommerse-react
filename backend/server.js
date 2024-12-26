@@ -133,6 +133,22 @@ app.delete('/api/wishlist/:productId', async (req, res) => {
   }
 });
 
+app.delete('/api/wishlist', async (req, res) => {
+  try {
+    const wishlist = await Wishlist.findOne();
+    if (wishlist) {
+      wishlist.productIds = [];
+      await wishlist.save();
+      res.status(200).json({ message: 'Wishlist cleared successfully.' });
+    } else {
+      res.status(404).json({ message: 'Wishlist not found.' });
+    }
+  } catch (error) {
+    console.error('Error clearing wishlist:', error);
+    res.status(500).json({ message: 'Error clearing wishlist.' });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
